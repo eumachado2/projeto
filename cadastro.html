@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastre-se</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class=container> 
+         <h2>Crie sua conta</h2>
+
+         <form id="formCadastro">
+
+          <div class="input-box">
+          <input type="text"  id="nome" placeholder="Nome" required></div>
+          <div class="input-box">
+          <input type="emaill"  id="emaill" placeholder="Email" required></div>
+          <div class="input-box">
+          <input type="password"  id="senha" placeholder="Senha" required></div>
+          <div class="input-box">
+          <input type="password" id="confirmarSenha" placeholder="Confirmar Senha" required>
+          </div>
+          <button type="submit" class="Cadastro">Cadastre-se</button>
+          <p class="msg" id="mensagem"></p>
+          <div class="register-link"><p>Ja tem conta? <a href="index.html">Entrar</a></p></div>
+          
+         </form>
+    </div>
+    <script>
+        document.getElementById("formCadastro").addEventListener("submit", "function"); {
+            let nome = document.getElementById("nome").value;
+            let emaill = document.getElementById("emaill").value;
+            let senha = document.getElementById("senha").value;
+            let confirmar = document.getElementById("confirmarSenha").value;
+            let msg = document.getElementById("mensagem");
+
+            if(senha !== confirmar){
+                msg.textContent="As senhas não coincidem!"
+                msg.style.color="red";
+                return;
+            }
+
+            msg.textContent= "Cadastro realizado com sucesso!"
+            msg.style.color = "green";
+           
+        }
+    </script>
+</body>
+</html>
