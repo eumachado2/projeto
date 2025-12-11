@@ -182,34 +182,3 @@ body {
     66%  { transform: translateX(-200%); }
     100% { transform: translateX(0); }
 }
-.carousel {
-    width: 350px;       
-    height: 300px;
-    position: relative;
-    margin: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.carousel img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 15px; 
-}
-
-.carousel button {
-    position: absolute;
-    background-color: rgba(0,0,0,0.5);
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 25px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.prev { left: 10px; }
-.next { right: 10px; }

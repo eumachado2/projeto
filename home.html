@@ -3,69 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Bem-vindo á Rifa da Casa</title>
+    <title>Bem-vindo à Rifa da Casa</title>
+
     <style>
-    body {
-        background-color: black;     
-        color: white;              
-        text-align: center;         
-        font-family: "Playfair Display", serif;
-        margin: 0;
-        padding: 40px;
-    }
+        body {
+            margin: 0;
+            font-family: "Playfair Display", serif;
+            background: linear-gradient(to bottom, #000000, #1a1a1a);
+            color: white;
+            text-align: center;
+            padding-bottom: 50px;
+        }
 
-    ul {
-        display: inline-block;       
-        text-align: left;            
-    }
+        header {
+            background:rgb(0, 0, 54);
+            padding: 25px 0;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
 
-    img {
-        width: 150px;                
-        margin: 10px;
-    }
-</style>
-<body class="Home">
-    <main class="container">
-    <div class="home.container">
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background:black;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
 
-        <h1>Bem-vindo á Rifa!</h1>
-        <h2>Concorra a uma Casa</h2>
-      
+        h2 {
+            color: black;
+            margin-top: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+
+        ul li::before {
+            content: '✔ ';
+            color:black;
+        }
+
+        .slideshow {
+            margin: 40px auto;
+            max-width: 700px;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 3px solid black;
+            box-shadow: 0 0 15px black(0, 170, 255, 0.4);
+            background: #000;
+        }
+
+        .slides {
+            display: flex;
+            animation: slide 12s infinite;
+        }
+
+        .slides img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            33% { transform: translateX(-100%); }
+            66% { transform: translateX(-200%); }
+            100% { transform: translateX(0); }
+        }
+
+        .title-section {
+            margin-top: 40px;
+            font-size: 26px;
+            font-weight: bold;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>Bem-vindo à Rifa da Casa</header>
+
+<div class="container">
+    <h2>Concorra a uma Casa!</h2>
+    <p>
+        Participe da nossa rifa e tenha a chance de ganhar uma linda casa localizada em
+        <strong>Santa Maria, Belford Roxo</strong>.
+    </p>
+
+    <ul>
+        <li>2 quartos</li>
+        <li>Sala ampla</li>
+        <li>Cozinha</li>
+        <li>Banheiro</li>
+    </ul>
+
+    <p>Uma oportunidade única para conquistar sua casa própria ❤️</p>
+
+    <div class="title-section">Projeto da Casa:</div>
+    <div class="slideshow">
+        <div class="slides">
+            <img src="casa.png" alt="Casa 1">
+            <img src="casa2.png" alt="Casa 2">
+            <img src="casa3.png" alt="Casa 3">
         </div>
+    </div>
 
-        <p> 
-        Participe  da nossa rifa e tenha a chance de ganhar uma casa
-        localizada em <strong>Santa Maria, Belford Roxo</strong>.
-        A casa possui:
-        </p>
-
-        <ul>
-            <li>2 quartos</li>
-            <li>Sala ampla</li>
-            <li>Cozinha</li>
-            <li>Banheiro</li>
-        </ul>
-        <p>
-              Uma oportunidade única para conquistar sua casa própria e passar o dia em Arraial do Cabo!
-        </p>
-        <p>
-            Adquira sua Rifa e participe do sorteio!
-        </p>
-
-        <h2>Projeto da Casa:</h2>
-       <div class="slideshow">
-    <div class="slides">
-        <img src="casa.png" alt="">
-        <img src="casa2.png" alt="">
-        <img src="casa3.png" alt="">
+    <div class="title-section">Casa de Arraial do Cabo:</div>
+    <div class="slideshow">
+        <div class="slides">
+            <img src="casa.png" alt="Casa Arraial 1">
+            <img src="casa2.png" alt="Casa Arraial 2">
+            <img src="casa3.png" alt="Casa Arraial 3">
+        </div>
     </div>
 </div>
-       
-    </div>
-</body>
-</head>
-<body>
-    
+
 </body>
 </html>
