@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escolher Números da Rifa</title>
+
+<style>
+    body {
+        background:#000;
+        color:#fff;
+        font-family: Arial, sans-serif;
+        text-align:center;
+        padding: 20px;
+    }
+
+    h1 { margin-bottom: 10px; }
+
+    .grid {
+        display:grid;
+        grid-template-columns:repeat(10, 1fr);
+        gap:6px;
+        max-width:900px;
+        margin:20px auto;
+    }
+
+    .num {
+        padding:8px;
+        background:#111;
+        border:1px solid #333;
+        border-radius:6px;
+        cursor:pointer;
+        user-select:none;
+    }
+
+    .num.sel {
+        background:#4caf50;
+        color:black;
+        font-weight:bold;
+    }
+
+    @media(max-width:700px){
+        .grid { grid-template-columns:repeat(5,1fr); }
+    }
+
+    button {
+        padding:10px 20px;
+        border:none;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:16px;
+        background:#4caf50;
+        color:black;
+        margin-top:20px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Escolha seus números</h1>
+<p>Cada número custa <strong>R$50,00</strong></p>
+
+<div id="info">
+    Selecionados: <strong id="qtd">0</strong> —
+    Total: <strong id="total">R$0</strong>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<a id="irPagamento" href="pagamento.html">
+    <button>Prosseguir para Pagamento</button>
+    <button type="submit" class="Cadastro" formaction="pagamento.html"></button>
+</a>
+
+<script>
+const grid = document.getElementById('grid');
+const selecionados = new Set();
+
+for (let i = 1; i <= 5000; i++) {
+    const d = document.createElement('div');
+    d.className = 'num';
+    d.textContent = i;
+    d.dataset.n = i;
+
+    d.onclick = () => {
+        const n = Number(d.dataset.n);
+
+        if (selecionados.has(n)) {
+            selecionados.delete(n);
+            d.classList.remove('sel');
+        } else {
+            selecionados.add(n);
+            d.classList.add('sel');
+        }
+
+        atualizar();
+    };
+
+    grid.appendChild(d);
+}
+
+function atualizar() {
+    const qtd = selecionados.size;
+    const total = qtd * 50;
+
+    document.getElementById('qtd').textContent = qtd;
+    document.getElementById('total').textContent = "R$" + total;
+    localStorage.setItem("numerosSelecionados", JSON.stringify([...selecionados]));
+}
+</script>
+
+</body>
+</html>
+
