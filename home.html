@@ -69,18 +69,16 @@
 
         .slides {
             display: flex;
-            /* Removemos a animação genérica aqui */
         }
 
         .slides img {
             width: 100%;
             border-radius: 10px;
-            flex-shrink: 0; /* Garante que a imagem não encolha */
+            flex-shrink: 0;
         }
 
-        /* --- ANIMAÇÃO ESPECÍFICA PARA A CASA (3 Imagens) --- */
         .slides-casa {
-            animation: slideCasa 12s infinite; /* Ajustei o tempo */
+            animation: slideCasa 12s infinite;
         }
 
         @keyframes slideCasa {
@@ -90,9 +88,7 @@
             100% { transform: translateX(0); }
         }
 
-        /* --- ANIMAÇÃO ESPECÍFICA PARA ARRAIAL (9 Imagens) --- */
         .slides-arraial {
-            /* Tempo maior (36s) porque tem 3x mais imagens */
             animation: slideArraial 36s infinite; 
         }
 
