@@ -89,22 +89,18 @@
     // 2. Monta a mensagem bonita
     let mensagem = `Olá! Segue meu comprovante de pagamento da Rifa.\n\n`;
     
-    mensagem += `🔢 *Números Escolhidos:* ${numeros.join(", ")}\n`;
-    mensagem += `💰 *Valor Total:* R$ ${total},00\n`;
+    mensagem += `*Números Escolhidos:* ${numeros.join(", ")}\n`;
+    mensagem += `*Valor Total:* R$ ${total},00\n`;
 
-    // Só adiciona a parte das datas se houver datas salvas
     if (datas.length > 0) {
-        mensagem += `🏖️ *Fim de Semana em Arraial:* De ${datas[0]} até ${datas[datas.length - 1]}\n`;
+        mensagem += `*Fim de Semana em Arraial:* De ${datas[0]} até ${datas[datas.length - 1]}\n`;
     }
 
     mensagem += `\nAguardo a confirmação!`;
 
-    // 3. Cria o link do WhatsApp
-    // encodeURIComponent garante que espaços e quebras de linha funcionem na URL
     const numeroZap = "5521964968099";
     const linkFinal = `https://wa.me/${numeroZap}?text=${encodeURIComponent(mensagem)}`;
 
-    // 4. Aplica no botão
     document.getElementById("btn-whatsapp").href = linkFinal;
 </script>
 
