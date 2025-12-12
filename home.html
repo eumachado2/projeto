@@ -20,7 +20,7 @@
         }
 
         header {
-            background:rgb(0, 0, 54);
+            background: rgb(0, 0, 54);
             padding: 25px 0;
             font-size: 50px;
             font-weight: bold;
@@ -32,13 +32,13 @@
             max-width: 1000px;
             margin: 40px auto;
             padding: 30px;
-            background:black;
+            background: black;
             border-radius: 20px;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
         }
 
         h2 {
-            color:white;
+            color: white;
             margin-top: 40px;
             font-size: 40px;
         }
@@ -52,7 +52,7 @@
 
         ul li::before {
             content: '✔ ';
-            color:white;
+            color: white;
             font-size: 32px;
         }
 
@@ -62,60 +62,85 @@
             overflow: hidden;
             border-radius: 18px;
             border: 3px solid white;
-            box-shadow: 0 0 15px black(0, 170, 255, 0.4);
-            background:white;
+            /* Corrigi o erro de digitação de 'black' para 'rgba' para o brilho funcionar */
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.4);
+            background: white;
         }
 
         .slides {
             display: flex;
-            animation: slide 18s infinite;
+            /* Removemos a animação genérica aqui */
         }
 
         .slides img {
             width: 100%;
             border-radius: 10px;
+            flex-shrink: 0; /* Garante que a imagem não encolha */
         }
 
-        @keyframes slide {
+        /* --- ANIMAÇÃO ESPECÍFICA PARA A CASA (3 Imagens) --- */
+        .slides-casa {
+            animation: slideCasa 12s infinite; /* Ajustei o tempo */
+        }
+
+        @keyframes slideCasa {
             0% { transform: translateX(0); }
             33% { transform: translateX(-100%); }
             66% { transform: translateX(-200%); }
             100% { transform: translateX(0); }
         }
 
+        /* --- ANIMAÇÃO ESPECÍFICA PARA ARRAIAL (9 Imagens) --- */
+        .slides-arraial {
+            /* Tempo maior (36s) porque tem 3x mais imagens */
+            animation: slideArraial 36s infinite; 
+        }
+
+        @keyframes slideArraial {
+            0% { transform: translateX(0); }
+            12.5% { transform: translateX(-100%); }
+            25% { transform: translateX(-200%); }
+            37.5% { transform: translateX(-300%); }
+            50% { transform: translateX(-400%); }
+            62.5% { transform: translateX(-500%); }
+            75% { transform: translateX(-600%); }
+            87.5% { transform: translateX(-700%); }
+            100% { transform: translateX(-800%); }
+        }
+
         .title-section {
             margin-top: 60px;
             font-size: 50px;
             font-weight: bold;
-            color:white;
+            color: white;
         }
 
-        .Login{
-    width: 100%;
-    height: 50px;
-    background-color: #fff;
-    border: none;
-    border-radius: 40px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #333;
-    font-weight: 600;
-    box-shadow: 0 0 10px rgba(0 , 0, 0, .2);
-    margin-top: 20px;
-}
+        .Login {
+            width: 100%;
+            height: 50px;
+            background-color: #fff;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+            margin-top: 20px;
+        }
 
-.Cadastro{
-    width: 100%;
-    height: 50px;
-    background-color: #fff;
-    border: none;
-    border-radius: 40px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #333;
-    font-weight: 600;
-    box-shadow: 0 0 10px rgba(0 , 0, 0, .2);
-}
+        .Cadastro {
+            width: 100%;
+            height: 50px;
+            background-color: #fff;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+        }
     </style>
 </head>
 
@@ -141,8 +166,9 @@
     <p>Uma oportunidade única para conquistar sua casa própria!</p>
 
     <div class="title-section">Projeto da Casa:</div>
+    
     <div class="slideshow">
-        <div class="slides">
+        <div class="slides slides-casa">
             <img src="casa.png" alt="Casa 1">
             <img src="casa2.png" alt="Casa 2">
             <img src="casa3.png" alt="Casa 3">
@@ -152,22 +178,24 @@
     <p>
         Você comprando 3 ou 4 rifas, você recebe diárias para ir 
         <strong>para Arraial do Cabo</strong>.
-         <div class="title-section">Casa de Arraial do Cabo:</div>
     </p>
+
+    <div class="title-section">Casa de Arraial do Cabo:</div>
+    
     <div class="slideshow">
-        <div class="slides">
+        <div class="slides slides-arraial">
             <img src="arraial.png" alt="Casa Arraial 1">
             <img src="arraial2.png" alt="Casa Arraial 2">
             <img src="arraial3.png" alt="Casa Arraial 3">
-            <img src="arraial4.png" alt="Casa Arraial 3">
-            <img src="arraial5.png" alt="Casa Arraial 3">
-            <img src="arraial6.png" alt="Casa Arraial 3">
-            <img src="arraial7.png" alt="Casa Arraial 3">
-            <img src="arraial8.png" alt="Casa Arraial 3">
-            <img src="arraial9.png" alt="Casa Arraial 3">
+            <img src="arraial4.png" alt="Casa Arraial 4">
+            <img src="arraial5.png" alt="Casa Arraial 5">
+            <img src="arraial6.png" alt="Casa Arraial 6">
+            <img src="arraial7.png" alt="Casa Arraial 7">
+            <img src="arraial8.png" alt="Casa Arraial 8">
+            <img src="arraial9.png" alt="Casa Arraial 9">
         </div>
-        
     </div> 
+
     <form><button type="submit" class="Cadastro" formaction="rifas.html">Prosseguir</button></form>
 </div>
 
