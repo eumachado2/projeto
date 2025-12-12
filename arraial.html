@@ -8,17 +8,17 @@
     body {
       margin: 0;
       font-family: "Poppins", sans-serif;
-      background: linear-gradient(to bottom,black, #ffffff);
+      background: linear-gradient(to bottom, black, #ffffff);
       color: #1a1a1a;
     }
 
     header {
-      background:black;
+      background: black;
       color: white;
       padding: 20px;
       text-align: center;
       font-size: 26px;
-      font-weight: 700px;
+      font-weight: 700;
       letter-spacing: 1px;
     }
 
@@ -35,7 +35,7 @@
       text-align: center;
       font-size: 28px;
       margin-bottom: 10px;
-      color:black;
+      color: black;
     }
 
     p {
@@ -58,7 +58,7 @@
       justify-content: space-between;
       align-items: center;
       font-size: 20px;
-      font-weight: 800px;
+      font-weight: 800;
       margin-bottom: 10px;
     }
 
@@ -89,8 +89,9 @@
       background: black;
       color: white;
       font-weight: bold;
+      border: 2px solid #333;
     }
-
+    
     .btn {
       display: block;
       width: 100%;
@@ -108,7 +109,7 @@
     }
 
     .btn:hover {
-      background: black;
+      background: #333;
     }
   </style>
 </head>
@@ -118,7 +119,8 @@
 
 <div class="container">
   <h2>🎉 Parabéns! 🎉</h2>
-  <p>Ao selecionar 3 ou 4 números, você ganhou o direito de agendar um <strong>fim de semana em Arraial do Cabo</strong>!</p>
+  <p>Ao selecionar 4 ou mais números, você ganhou o direito de agendar um <strong>fim de semana em Arraial do Cabo</strong>!</p>
+  <p style="font-size: 14px; color: #555;">(Selecione a Data de Chegada e depois a Data de Saída)</p>
 
   <div class="calendar">
     <div class="calendar-header">
@@ -131,8 +133,8 @@
     <div class="days" id="days"></div>
   </div>
 
-  <a class="btn" onclick="confirmarData()" href="pagamento.html">Confirmar Data</a>
-  <a class="btn" href="home.html" style="background:#555">Voltar</a>
+  <a class="btn" onclick="confirmarData()" href="#">Confirmar Datas</a>
+  <a class="btn" href="rifas.html" style="background:#555">Voltar</a>
 </div>
 
 <script>
@@ -147,7 +149,8 @@
   });
 
   let currentDate = new Date();
-  let selectedDay = null;
+  let startDate = null;
+  let endDate = null;
 
   function renderCalendar() {
     const year = currentDate.getFullYear();
@@ -172,20 +175,45 @@
       div.classList.add("day");
       div.textContent = d;
 
-      div.onclick = () => selectDay(div, year, month, d);
+      const thisDate = new Date(year, month, d);
+      thisDate.setHours(0,0,0,0);
 
+      if (startDate && thisDate.getTime() === startDate.getTime()) div.classList.add("selected");
+      if (endDate && thisDate.getTime() === endDate.getTime()) div.classList.add("selected");
+      if (startDate && endDate && thisDate > startDate && thisDate < endDate) div.classList.add("selected");
+
+      div.onclick = () => handleDateClick(thisDate);
       daysContainer.appendChild(div);
     }
   }
 
-  function selectDay(div, year, month, day) {
-    if (selectedDay) selectedDay.classList.remove("selected");
-    div.classList.add("selected");
-    selectedDay = div;
+  function handleDateClick(clickedDate) {
+    if (!startDate || (startDate && endDate)) {
+      startDate = clickedDate;
+      endDate = null;
+    } else if (clickedDate < startDate) {
+      startDate = clickedDate;
+    } else if (clickedDate > startDate) {
+      endDate = clickedDate;
+    }
+    renderCalendar();
+  }
 
-    const fullDate = `${day}/${month + 1}/${year}`;
-    localStorage.setItem("dataArraial", fullDate);
+  function saveToLocalStorage() {
+    if (!startDate || !endDate) return false;
     
+    let datesList = [];
+    let current = new Date(startDate);
+    while (current <= endDate) {
+      const d = current.getDate();
+      const m = current.getMonth() + 1;
+      const y = current.getFullYear();
+      datesList.push(`${d}/${m}/${y}`);
+      current.setDate(current.getDate() + 1);
+    }
+    
+    localStorage.setItem("datasArraial", JSON.stringify(datesList));
+    return true;
   }
 
   function prevMonth() {
@@ -199,16 +227,14 @@
   }
 
   function confirmarData() {
-    const data = localStorage.getItem("dataArraial");
-    if (!data) {
-      alert("Selecione uma data primeiro!");
-      return;
+    if (saveToLocalStorage()) {
+       window.location.href = "pagamento.html";
+    } else {
+       alert("Por favor, selecione a data de chegada e a data de saída.");
     }
-    alert("Data confirmada: " + data);
   }
 
   renderCalendar();
-  
 </script>
 
 </body>

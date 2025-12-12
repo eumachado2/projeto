@@ -9,54 +9,52 @@
         color: #fff;
         font-family: Arial, sans-serif;
         text-align: center;
-        padding: 70px;
+        padding: 50px 20px;
     }
 
     .box {
         background: rgba(255, 255, 255, 0.1);
-        padding: 200px;
+        padding: 40px;
         border-radius: 15px;
-        width: 90%;
-        max-width: 500px;
+        width: 100%;
+        max-width: 600px;
         margin: auto;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     }
 
-    h1 {
-        font-size: 40px;
-        margin-bottom: 10px;
-    }
-
-    p {
-        font-size: 25px;
-        line-height: 1.5;
-        margin-bottom: 20px;
-    }
+    h1 { font-size: 36px; margin-bottom: 10px; }
+    p { font-size: 20px; line-height: 1.5; margin-bottom: 20px; }
 
     a.botao {
-        display: inline-block;
+        display: block;
         background-color: #25D366;
         color: #fff;
-        padding: 12px 20px;
+        padding: 15px 20px;
         border-radius: 8px;
         font-size: 18px;
         text-decoration: none;
         font-weight: bold;
+        margin: 20px auto;
+        max-width: 300px;
+    }
+    
+    a.botao:hover { background-color: #1ebc57; }
+
+    .Login{
+        width: 100%;
+        max-width: 300px;
+        height: 50px;
+        background-color: #444;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        color: #fff;
+        font-weight: bold;
+        box-shadow: 0 0 10px rgba(0 , 0, 0, .2);
         margin-top: 10px;
     }
-        .Login{
-    width: 67%;
-    height: 50px;
-    background-color:#25D366;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    color: #fff;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(0 , 0, 0, .2);
-    margin-top: 10px;
-    }
+    .Login:hover { background-color: #666; }
 </style>
 </head>
 
@@ -71,17 +69,44 @@
         🔔 Fique atento(a)! Publicaremos o resultado no WhatsApp.
     </p>
 
-    <p><strong>Envie seu comprovante de pagamento:</strong></p>
+    <p><strong>Clique abaixo para enviar o comprovante:</strong></p>
 
-    <a class="botao" 
-       href="https://wa.me/5521964968099?text=Olá!%20Segue%20meu%20comprovante%20de%20pagamento."
-       target="_blank">
-       Enviar Comprovante no WhatsApp
+    <a id="btn-whatsapp" class="botao" href="#" target="_blank">
+        Enviar Comprovante no WhatsApp
     </a>
+    
     <div>
-         <form><button type="submit" class="Login" formaction="home.html" >Voltar</button></form>
+         <form><button type="submit" class="Login" formaction="home.html">Voltar ao Início</button></form>
     </div>
 </div>
+
+<script>
+    // 1. Recupera todos os dados salvos
+    const numeros = JSON.parse(localStorage.getItem("numerosSelecionados") || "[]");
+    const datas = JSON.parse(localStorage.getItem("datasArraial") || "[]");
+    const total = numeros.length * 50;
+
+    // 2. Monta a mensagem bonita
+    let mensagem = `Olá! Segue meu comprovante de pagamento da Rifa.\n\n`;
+    
+    mensagem += `🔢 *Números Escolhidos:* ${numeros.join(", ")}\n`;
+    mensagem += `💰 *Valor Total:* R$ ${total},00\n`;
+
+    // Só adiciona a parte das datas se houver datas salvas
+    if (datas.length > 0) {
+        mensagem += `🏖️ *Fim de Semana em Arraial:* De ${datas[0]} até ${datas[datas.length - 1]}\n`;
+    }
+
+    mensagem += `\nAguardo a confirmação!`;
+
+    // 3. Cria o link do WhatsApp
+    // encodeURIComponent garante que espaços e quebras de linha funcionem na URL
+    const numeroZap = "5521964968099";
+    const linkFinal = `https://wa.me/${numeroZap}?text=${encodeURIComponent(mensagem)}`;
+
+    // 4. Aplica no botão
+    document.getElementById("btn-whatsapp").href = linkFinal;
+</script>
 
 </body>
 </html>

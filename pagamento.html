@@ -11,7 +11,7 @@
       background: linear-gradient(to bottom, black, #ffffff);
       color: #1a1a1a;
       text-align: center;
-      padding: 180px;
+      padding: 50px 20px;
     }
 
     .container {
@@ -23,19 +23,19 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
-    h1 {
-      font-size: 32px;
-      color:black;
-      margin-bottom: 10px;
-    }
+    h1 { font-size: 32px; color:black; margin-bottom: 10px; }
+    h2 { font-size: 24px; margin-bottom: 20px; }
+    p { font-size: 18px; }
 
-    h2 {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-
-    p {
-      font-size: 18px;
+    .summary {
+        background: #eef;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: left;
+        display: inline-block;
+        width: 100%;
+        max-width: 400px;
     }
 
     .pix-box {
@@ -51,7 +51,7 @@
       display: block;
       width: 100%;
       max-width: 300px;
-      margin: 30px auto;
+      margin: 20px auto;
       padding: 15px;
       text-align: center;
       background:black;
@@ -63,32 +63,38 @@
       text-decoration: none;
     }
 
-    .btn:hover {
-      background: black;
-    }
-
-    img.qr {
-      width: 230px;
-      border-radius: 12px;
-      margin-top: 15px;
-    }
+    .btn:hover { background: #333; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h1>Pagamento da Rifa</h1>
-    <p>Finalize sua participação realizando o pagamento pelo PIX.</p>
+    <p>Confira seu pedido e realize o PIX.</p>
+
+    <div class="summary">
+        <p><strong>Rifas:</strong> <span id="resumo-qtd">0</span> números</p>
+        <p><strong>Total a Pagar:</strong> <span id="resumo-valor" style="color: green; font-weight: bold;">R$ 0,00</span></p>
+    </div>
 
     <div class="pix-box">
       <h2>Chave PIX:</h2>
-      <p><strong>099.955.867-62</strong></p>
-       <p><strong>Rodrigo Louredo Rodrigues</strong></p>
+      <p style="font-size: 22px;"><strong>099.955.867-62</strong></p>
+      <p><strong>Rodrigo Louredo Rodrigues</strong></p>
     </div>
 
-    <a class="btn" href="agradecimento.html">Já paguei</a>
-    <a class="btn" style="background:black" href="rifas.html" >Voltar</a>
+    <a class="btn" href="agradecimento.html">Já fiz o PIX</a>
+    <a class="btn" style="background:#555" href="rifas.html" >Voltar / Editar</a>
   </div>
+
+<script>
+    // Carrega dados para mostrar resumo
+    const numeros = JSON.parse(localStorage.getItem("numerosSelecionados") || "[]");
+    const total = numeros.length * 50;
+
+    document.getElementById("resumo-qtd").innerText = numeros.length;
+    document.getElementById("resumo-valor").innerText = "R$ " + total + ",00";
+</script>
 
 </body>
 </html>

@@ -44,14 +44,20 @@
     }
 
     button {
-        padding:10px 20px;
+        padding:15px 30px;
         border:none;
         border-radius:8px;
         cursor:pointer;
-        font-size:16px;
+        font-size:18px;
+        font-weight: bold;
         background:white;
         color:black;
         margin-top:20px;
+        transition: 0.3s;
+    }
+    
+    button:hover {
+        background: #ddd;
     }
 </style>
 </head>
@@ -59,6 +65,7 @@
 
 <h1>Escolha seus números</h1>
 <p>Cada número custa <strong>R$50,00</strong></p>
+<p style="font-size: 14px; color: #aaa;">Selecione 4 ou mais para ganhar o fim de semana!</p>
 
 <div id="info">
     Selecionados: <strong id="qtd">0</strong> —
@@ -67,18 +74,18 @@
 
 <div class="grid" id="grid"></div>
 
-<a id="irPagamento" href="pagamento.html">
-    <button type="submit" class="Cadastro" formaction="pagamento.html">Prosseguir para Pagamento
-    </button>
-</a>
+<button onclick="prosseguir()">Prosseguir</button>
  
 <script>
 const grid = document.getElementById('grid');
-const selecionados = new Set();
+// Tenta recuperar seleção anterior se existir
+const savedSelection = JSON.parse(localStorage.getItem("numerosSelecionados") || "[]");
+const selecionados = new Set(savedSelection);
 
 for (let i = 1; i <= 5000; i++) {
     const d = document.createElement('div');
     d.className = 'num';
+    if (selecionados.has(i)) d.classList.add('sel'); // Marca se já estava salvo
     d.textContent = i;
     d.dataset.n = i;
 
@@ -105,15 +112,36 @@ function atualizar() {
 
     document.getElementById('qtd').textContent = qtd;
     document.getElementById('total').textContent = "R$" + total;
+    
+    // Salva no navegador
     localStorage.setItem("numerosSelecionados", JSON.stringify([...selecionados]));
-
-    if (qtd >= 4) {
-        localStorage.setItem("rifaLiberada", "ok");
-        window.location.href = "arraial.html";
+    
+    // Limpa as datas se o usuário voltou aqui e mudou os números (para evitar inconsistência)
+    if (qtd < 4) {
+        localStorage.removeItem("datasArraial");
     }
 }
+
+function prosseguir() {
+    const qtd = selecionados.size;
+    
+    if (qtd === 0) {
+        alert("Selecione pelo menos um número!");
+        return;
+    }
+
+    // Se tiver 4 ou mais, vai para o calendário
+    if (qtd >= 4) {
+        window.location.href = "arraial.html";
+    } else {
+        // Se tiver menos, vai direto pagar
+        window.location.href = "pagamento.html";
+    }
+}
+
+// Inicializa os totais visuais ao carregar a página
+atualizar();
 </script>
 
 </body>
 </html>
-

@@ -56,15 +56,19 @@
             font-size: 32px;
         }
 
-        .slideshow {
+        /* Estilo comum para Slideshow e Mapas para manter consistência */
+        .media-box {
             margin: 40px auto;
             max-width: 700px;
             overflow: hidden;
             border-radius: 18px;
             border: 3px solid white;
-            /* Corrigi o erro de digitação de 'black' para 'rgba' para o brilho funcionar */
             box-shadow: 0 0 15px rgba(0, 170, 255, 0.4);
             background: white;
+        }
+
+        .slideshow {
+            /* Herda estilos de .media-box, mantendo compatibilidade */
         }
 
         .slides {
@@ -73,10 +77,11 @@
 
         .slides img {
             width: 100%;
-            border-radius: 10px;
+            border-radius: 10px; /* Ajuste fino interno */
             flex-shrink: 0;
         }
 
+        /* Animações dos Slides */
         .slides-casa {
             animation: slideCasa 12s infinite;
         }
@@ -104,6 +109,22 @@
             100% { transform: translateX(-800%); }
         }
 
+        /* Estilos específicos dos Mapas */
+        .map-title {
+            font-size: 24px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: #ddd;
+            font-weight: bold;
+        }
+
+        .map-frame {
+            width: 100%;
+            height: 350px;
+            border: 0;
+            display: block; /* Remove espaços extras inline */
+        }
+
         .title-section {
             margin-top: 60px;
             font-size: 50px;
@@ -111,21 +132,7 @@
             color: white;
         }
 
-        .Login {
-            width: 100%;
-            height: 50px;
-            background-color: #fff;
-            border: none;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #333;
-            font-weight: 600;
-            box-shadow: 0 0 10px rgba(0, 0, 0, .2);
-            margin-top: 20px;
-        }
-
-        .Cadastro {
+        .Login, .Cadastro {
             width: 100%;
             height: 50px;
             background-color: #fff;
@@ -137,6 +144,8 @@
             font-weight: 600;
             box-shadow: 0 0 10px rgba(0, 0, 0, .2);
         }
+        
+        .Login { margin-top: 20px; }
     </style>
 </head>
 
@@ -163,12 +172,21 @@
 
     <div class="title-section">Projeto da Casa:</div>
     
-    <div class="slideshow">
+    <div class="media-box slideshow">
         <div class="slides slides-casa">
             <img src="casa.png" alt="Casa 1">
             <img src="casa2.png" alt="Casa 2">
             <img src="casa3.png" alt="Casa 3">
         </div>
+    </div>
+
+    <div class="map-title">Localização da Casa</div>
+    <div class="media-box">
+        <iframe 
+            class="map-frame"
+            src="https://maps.google.com/maps?q=Rua%20Vitorino%20Palhares%2C%20Santa%20Maria%2C%20Belford%20Roxo&t=&z=15&ie=UTF8&iwloc=&output=embed"
+            allowfullscreen>
+        </iframe>
     </div>
 
     <p>
@@ -178,7 +196,7 @@
 
     <div class="title-section">Casa de Arraial do Cabo:</div>
     
-    <div class="slideshow">
+    <div class="media-box slideshow">
         <div class="slides slides-arraial">
             <img src="arraial.png" alt="Casa Arraial 1">
             <img src="arraial2.png" alt="Casa Arraial 2">
@@ -191,6 +209,15 @@
             <img src="arraial9.png" alt="Casa Arraial 9">
         </div>
     </div> 
+
+    <div class="map-title">Localização do Bônus (Praia do Pontal)</div>
+    <div class="media-box">
+        <iframe 
+            class="map-frame"
+            src="https://maps.google.com/maps?q=Praia%20do%20Pontal%2C%20Arraial%20do%20Cabo&t=&z=14&ie=UTF8&iwloc=&output=embed"
+            allowfullscreen>
+        </iframe>
+    </div>
 
     <form><button type="submit" class="Cadastro" formaction="rifas.html">Prosseguir</button></form>
 </div>
