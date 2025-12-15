@@ -1,146 +1,246 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escolher Números da Rifa</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escolha seus Números</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Playfair Display", serif;
+            background: linear-gradient(to bottom, #000000, #1a1a1a);
+            color: white;
+            text-align: center;
+            padding-bottom: 120px; /* Espaço para a barra fixa */
+        }
 
-<style>
-    body {
-        background:#000;
-        color:#fff;
-        font-family: Arial, sans-serif;
-        text-align:center;
-        padding: 20px;
-    }
+        header {
+            background: rgb(0, 0, 54);
+            padding: 25px 0;
+            font-size: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            margin-bottom: 40px;
+        }
 
-    h1 { margin-bottom: 10px; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-    .grid {
-        display:grid;
-        grid-template-columns:repeat(10, 1fr);
-        gap:6px;
-        max-width:900px;
-        margin:20px auto;
-    }
+        /* GRID DAS RIFAS */
+        .grid-rifas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+            background: black;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
 
-    .num {
-        padding:8px;
-        background:#111;
-        border:1px solid #333;
-        border-radius:6px;
-        cursor:pointer;
-        user-select:none;
-    }
+        .numero {
+            background-color: white;
+            color: #333;
+            padding: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+        }
 
-    .num.sel {
-        background:#4caf50;
-        color:black;
-        font-weight:bold;
-    }
+        .numero:hover { transform: scale(1.1); background-color: #f0f0f0; }
 
-    @media(max-width:700px){
-        .grid { grid-template-columns:repeat(5,1fr); }
-    }
+        .selecionado {
+            background-color: #28a745 !important;
+            color: white !important;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+        }
 
-    button {
-        padding:15px 30px;
-        border:none;
-        border-radius:8px;
-        cursor:pointer;
-        font-size:18px;
-        font-weight: bold;
-        background:white;
-        color:black;
-        margin-top:20px;
-        transition: 0.3s;
-    }
-    
-    button:hover {
-        background: #ddd;
-    }
-</style>
+        .vendido {
+            background-color: #333 !important;
+            color: #555 !important;
+            opacity: 0.3;
+            pointer-events: none;
+            border: 1px solid #444;
+        }
+
+        /* BARRA FIXA INFERIOR */
+        .barra-fixa {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(20, 20, 20, 0.95);
+            padding: 15px 0;
+            border-top: 2px solid #333;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px; /* Espaço entre os elementos */
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Novo estilo para o preço */
+        .info-preco {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .info-preco span {
+            color: #28a745; /* Verde Dinheiro */
+        }
+
+        .btn {
+            padding: 15px 40px;
+            background-color: white;
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .btn-voltar { background-color: #555; color: white; }
+        .btn-comprar { background-color: #28a745; color: white; }
+        .btn-comprar:hover { background-color: #218838; }
+
+    </style>
 </head>
 <body>
 
-<h1>Escolha seus números</h1>
-<p>Cada número custa <strong>R$50,00</strong></p>
-<p style="font-size: 14px; color: #aaa;">Selecione 4 ou mais para ganhar o fim de semana!</p>
+<header>Rifas (1 a 5000)</header>
 
-<div id="info">
-    Selecionados: <strong id="qtd">0</strong> —
-    Total: <strong id="total">R$0</strong>
+<div class="container">
+    <h2>Toque para selecionar (R$ 50,00 cada)</h2>
+    <div class="grid-rifas" id="grid">
+        </div>
 </div>
 
-<div class="grid" id="grid"></div>
+<div class="barra-fixa">
+    <a href="home.html" class="btn btn-voltar">Voltar</a>
+    
+    <div class="info-preco">
+        Total: <span id="valor-total">R$ 0,00</span>
+    </div>
 
-<button onclick="prosseguir()">Prosseguir</button>
- 
+    <button onclick="finalizarCompra()" class="btn btn-comprar">
+        Confirmar (<span id="contador">0</span>)
+    </button>
+</div>
+
 <script>
-const grid = document.getElementById('grid');
-// Tenta recuperar seleção anterior se existir
-const savedSelection = JSON.parse(localStorage.getItem("numerosSelecionados") || "[]");
-const selecionados = new Set(savedSelection);
+    const totalNumeros = 5000; 
+    const precoUnitario = 50.00; // Valor de cada rifa
 
-for (let i = 1; i <= 5000; i++) {
-    const d = document.createElement('div');
-    d.className = 'num';
-    if (selecionados.has(i)) d.classList.add('sel'); // Marca se já estava salvo
-    d.textContent = i;
-    d.dataset.n = i;
+    const grid = document.getElementById('grid');
+    const contadorEl = document.getElementById('contador');
+    const valorTotalEl = document.getElementById('valor-total'); // Elemento do preço
+    
+    let selecionados = []; 
 
-    d.onclick = () => {
-        const n = Number(d.dataset.n);
+    // Geração rápida dos botões
+    const fragment = document.createDocumentFragment();
+    for (let i = 1; i <= totalNumeros; i++) {
+        let btn = document.createElement('div');
+        btn.classList.add('numero');
+        btn.innerText = i;
+        btn.id = 'num-' + i;
+        btn.onclick = () => toggleSelecao(i, btn);
+        fragment.appendChild(btn);
+    }
+    grid.appendChild(fragment);
 
-        if (selecionados.has(n)) {
-            selecionados.delete(n);
-            d.classList.remove('sel');
+    // Função que seleciona e calcula o preço
+    function toggleSelecao(numero, elemento) {
+        if (elemento.classList.contains('vendido')) return;
+
+        if (selecionados.includes(numero)) {
+            selecionados = selecionados.filter(n => n !== numero);
+            elemento.classList.remove('selecionado');
         } else {
-            selecionados.add(n);
-            d.classList.add('sel');
+            selecionados.push(numero);
+            elemento.classList.add('selecionado');
+        }
+        
+        // Atualiza o contador (botão)
+        contadorEl.innerText = selecionados.length;
+
+        // Atualiza o Preço (Texto verde)
+        let total = selecionados.length * precoUnitario;
+        valorTotalEl.innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    async function finalizarCompra() {
+        if (selecionados.length === 0) {
+            alert("Selecione pelo menos um número!");
+            return;
         }
 
-        atualizar();
-    };
+        let valorFinal = selecionados.length * precoUnitario;
+        let valorFormatado = valorFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    grid.appendChild(d);
-}
+        if(!confirm(`Confirmar compra de ${selecionados.length} rifas?\nValor Total: ${valorFormatado}`)) return;
 
-function atualizar() {
-    const qtd = selecionados.size;
-    const total = qtd * 50;
+        try {
+            const response = await fetch('/api/comprar_multiplos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numeros: selecionados })
+            });
+            
+            const data = await response.json();
 
-    document.getElementById('qtd').textContent = qtd;
-    document.getElementById('total').textContent = "R$" + total;
-    
-    // Salva no navegador
-    localStorage.setItem("numerosSelecionados", JSON.stringify([...selecionados]));
-    
-    // Limpa as datas se o usuário voltou aqui e mudou os números (para evitar inconsistência)
-    if (qtd < 4) {
-        localStorage.removeItem("datasArraial");
+            if (data.sucesso) {
+                localStorage.setItem("numerosSelecionados", JSON.stringify(data.comprados));
+                localStorage.removeItem("datasArraial");
+
+                if (data.comprados.length >= 4) {
+                    alert("Parabéns! Você ganhou o bônus de Arraial!");
+                    window.location.href = "arraial.html"; 
+                } else {
+                    window.location.href = "pagamento.html"; 
+                }
+
+            } else {
+                alert("Erro: " + data.msg);
+                if(data.msg.includes("Login") || data.msg.includes("login")) window.location.href = "index.html";
+                atualizarStatus();
+            }
+        } catch (error) {
+            alert("Erro ao conectar com o servidor.");
+        }
     }
-}
 
-function prosseguir() {
-    const qtd = selecionados.size;
-    
-    if (qtd === 0) {
-        alert("Selecione pelo menos um número!");
-        return;
+    async function atualizarStatus() {
+        try {
+            const response = await fetch('/api/status_rifas');
+            const dados = await response.json();
+
+            for (const [num, status] of Object.entries(dados)) {
+                const el = document.getElementById('num-' + num);
+                if (el) {
+                    el.classList.remove('selecionado');
+                    el.classList.add('vendido');
+                    el.title = "Indisponível";
+                }
+            }
+        } catch (error) {
+            console.error("Erro:", error);
+        }
     }
 
-    // Se tiver 4 ou mais, vai para o calendário
-    if (qtd >= 4) {
-        window.location.href = "arraial.html";
-    } else {
-        // Se tiver menos, vai direto pagar
-        window.location.href = "pagamento.html";
-    }
-}
-
-// Inicializa os totais visuais ao carregar a página
-atualizar();
+    atualizarStatus();
+    setInterval(atualizarStatus, 10000); 
 </script>
 
 </body>

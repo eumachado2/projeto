@@ -1,42 +1,63 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css " rel="stylesheet">
-     <link rel="stylesheet" href="styles.css">
-    <title>Rifa</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Login Rifa</title>
 </head>
-
 <body>
     <main class="container">
-        <form>
+        <form id="formLogin">
             <h1>Login</h1>
             <div class="input-box">
-                <input placeholder="Usuário" type="email">
+                <input id="email" placeholder="Usuário (Email)" type="email" required>
                 <i class="bx bxs-user"></i>
             </div>
             <div class="input-box">
-                <input placeholder="Senha" type="password">
+                <input id="senha" placeholder="Senha" type="password" required>
                 <i class="bx bxs-lock-alt"></i>
             </div>
             
             <div class="remember-forgot">
-                <label>
-                    <input type="checkbox">
-                    Lembrar Senha
-                </label>
+                <label><input type="checkbox"> Lembrar Senha</label>
                 <a href="esqueci.html">Esqueci a senha</a>
             </div>
 
-            <button type="submit" class="Login" formaction="home.html" >Login</button>
+            <button type="submit" class="Login">Login</button>
 
             <div class="register-link">
                 <p>Não tem uma conta? <a href="cadastro.html">Cadastre-se</a></p>
             </div>
         </form>
     </main>
-</body>
 
+    <script>
+        document.getElementById('formLogin').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Impede recarregar a página
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email: email, senha: senha })
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    window.location.href = "home.html"; // Vai para a Home
+                } else {
+                    alert(data.msg); // Mostra erro
+                }
+            } catch (error) {
+                alert("Erro ao conectar com servidor.");
+            }
+        });
+    </script>
+</body>
 </html>

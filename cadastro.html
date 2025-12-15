@@ -7,44 +7,51 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class=container> 
+    <div class="container"> 
          <h2>Crie sua conta</h2>
-
          <form id="formCadastro">
-
-          <div class="input-box">
-          <input type="text"  id="nome" placeholder="Nome" required></div>
-          <div class="input-box">
-          <input type="emaill"  id="emaill" placeholder="Email" required></div>
-          <div class="input-box">
-          <input type="password"  id="senha" placeholder="Senha" required></div>
-          <div class="input-box">
-          <input type="password" id="confirmarSenha" placeholder="Confirmar Senha" required>
-          </div>
-          <button type="submit" class="Cadastro" formaction="index.html">Cadastre-se</button>
+          <div class="input-box"><input type="text" id="nome" placeholder="Nome" required></div>
+          <div class="input-box"><input type="email" id="email" placeholder="Email" required></div>
+          <div class="input-box"><input type="password" id="senha" placeholder="Senha" required></div>
+          <div class="input-box"><input type="password" id="confirmarSenha" placeholder="Confirmar Senha" required></div>
+          
+          <button type="submit" class="Cadastro">Cadastre-se</button>
+          
           <p class="msg" id="mensagem"></p>
           <div class="register-link"><p>Ja tem conta? <a href="index.html">Entrar</a></p></div>
-          
          </form>
     </div>
     <script>
-        document.getElementById("formCadastro").addEventListener("submit", "function"); {
+        document.getElementById("formCadastro").addEventListener("submit", async function(e) {
+            e.preventDefault();
             let nome = document.getElementById("nome").value;
-            let emaill = document.getElementById("emaill").value;
+            let email = document.getElementById("email").value;
             let senha = document.getElementById("senha").value;
             let confirmar = document.getElementById("confirmarSenha").value;
             let msg = document.getElementById("mensagem");
 
             if(senha !== confirmar){
-                msg.textContent="As senhas não coincidem!"
+                msg.textContent="As senhas não coincidem!";
                 msg.style.color="red";
                 return;
             }
 
-            msg.textContent= "Cadastro realizado com sucesso!"
-            msg.style.color = "green";
-           
-        }
+            const response = await fetch('/api/cadastro', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nome, email, senha })
+            });
+            const data = await response.json();
+
+            if(data.sucesso){
+                msg.textContent= "Cadastro realizado! Redirecionando...";
+                msg.style.color = "green";
+                setTimeout(() => window.location.href = "index.html", 1500);
+            } else {
+                msg.textContent = data.msg;
+                msg.style.color = "red";
+            }
+        });
     </script>
 </body>
 </html>
