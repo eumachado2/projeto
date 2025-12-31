@@ -3,6 +3,7 @@ import sys
 import webbrowser
 from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory
 import mysql.connector
+from waitress import serve # <--- IMPORTANTE PARA ACESSO EXTERNO
 
 # --- CONFIGURAÇÃO ---
 if getattr(sys, 'frozen', False):
@@ -15,10 +16,13 @@ app.secret_key = 'sua_chave_secreta_aqui'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 os.chdir(BASE_DIR)
 
+# --- CONFIGURAÇÕES DO ADMIN ---
+SENHA_ADMIN = 'admsenha4321'
+
 # --- BANCO DE DADOS ---
 DB_HOST = 'localhost'
 DB_USER = 'root'
-DB_PASS = 'root'       
+DB_PASS = ''       
 DB_NAME = 'sistema_rifa'
 QTD_RIFAS = 5000   
 PRECO_RIFA = 50.00 
@@ -47,7 +51,6 @@ def inicializar_banco():
             )
         """)
         
-        # Cria a tabela rifas (se não existir)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS rifas (
                 numero INT PRIMARY KEY,
@@ -57,15 +60,11 @@ def inicializar_banco():
             )
         """)
 
-        # --- ATUALIZAÇÃO DE ESTRUTURA (MIGRAÇÃO AUTOMÁTICA) ---
-        # Tenta alterar a coluna status para incluir 'pendente' caso o banco seja antigo
         try:
             cursor.execute("ALTER TABLE rifas MODIFY COLUMN status ENUM('disponivel', 'pendente', 'vendido') DEFAULT 'disponivel'")
             conn.commit()
-        except:
-            pass # Se der erro, provavelmente já está certo
+        except: pass
 
-        # Expansão de Rifas
         cursor.execute("SELECT COUNT(*) FROM rifas")
         qtd_atual = cursor.fetchone()[0]
 
@@ -122,8 +121,15 @@ def pagina_agradecimento():
     if 'usuario_id' not in session: return redirect('/')
     return render_template('agradecimento.html')
 
+# --- ROTAS ADMIN (PROTEGIDAS) ---
+@app.route('/admin_login.html')
+def pagina_admin_login():
+    if session.get('admin_logado'): return redirect('/admin.html')
+    return render_template('admin_login.html')
+
 @app.route('/admin.html')
 def pagina_admin():
+    if not session.get('admin_logado'): return redirect('/admin_login.html')
     return render_template('admin.html')
 
 @app.route('/<path:filename>')
@@ -170,15 +176,11 @@ def api_login():
 
 @app.route('/api/status_rifas')
 def status_rifas():
-    # Para o público, tanto 'pendente' quanto 'vendido' devem parecer ocupados
     conn = get_db_connection()
     if not conn: return jsonify({})
     cursor = conn.cursor(dictionary=True)
-    
-    # Retorna o status real (pendente ou vendido) para o front pintar cores diferentes se quiser
     cursor.execute("SELECT numero, status FROM rifas WHERE status IN ('vendido', 'pendente')")
     ocupadas = {str(row['numero']): row['status'] for row in cursor.fetchall()}
-    
     cursor.close()
     conn.close()
     return jsonify(ocupadas)
@@ -201,7 +203,6 @@ def comprar_multiplos():
             cursor.execute("SELECT status FROM rifas WHERE numero = %s FOR UPDATE", (num,))
             row = cursor.fetchone()
             if row and row[0] == 'disponivel':
-                # AGORA O STATUS VIRA 'PENDENTE' AO COMPRAR
                 cursor.execute("UPDATE rifas SET status='pendente', dono_id=%s WHERE numero=%s", (usuario_id, num))
                 comprados.append(num)
             else:
@@ -218,15 +219,33 @@ def comprar_multiplos():
         return jsonify({'sucesso': True, 'comprados': comprados, 'falharam': falharam})
     return jsonify({'sucesso': False, 'msg': 'Rifas indisponíveis.'})
 
-# --- APIS DO ADMIN ---
+# --- APIS DO ADMIN (COM PROTEÇÃO) ---
+
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login_api():
+    dados = request.json
+    if dados.get('senha') == SENHA_ADMIN:
+        session['admin_logado'] = True
+        return jsonify({'sucesso': True})
+    return jsonify({'sucesso': False, 'msg': 'Senha incorreta'})
+
+@app.route('/api/admin/logout')
+def admin_logout():
+    session.pop('admin_logado', None)
+    return redirect('/admin_login.html')
+
+# Middleware simples para verificar sessão nas rotas abaixo
+def check_admin():
+    return session.get('admin_logado')
 
 @app.route('/api/admin/dados')
 def admin_dados():
+    if not check_admin(): return jsonify({'sucesso': False, 'msg': 'Acesso negado'}), 403
+    
     conn = get_db_connection()
     if not conn: return jsonify({'sucesso': False})
     cursor = conn.cursor(dictionary=True)
 
-    # Estatísticas
     cursor.execute("SELECT COUNT(*) as total FROM rifas")
     total_rifas = cursor.fetchone()['total']
     
@@ -236,7 +255,6 @@ def admin_dados():
     cursor.execute("SELECT COUNT(*) as pendentes FROM rifas WHERE status='pendente'")
     qtd_pendentes = cursor.fetchone()['pendentes']
 
-    # Lista de Usuários com separação de Pendentes e Confirmados
     query_usuarios = """
         SELECT 
             u.id, 
@@ -271,13 +289,12 @@ def admin_dados():
 
 @app.route('/api/admin/aprovar_compra', methods=['POST'])
 def admin_aprovar():
-    # Transforma 'pendente' em 'vendido'
+    if not check_admin(): return jsonify({'sucesso': False}), 403
     dados = request.json
     usuario_id = dados.get('usuario_id')
-    numeros = dados.get('numeros') # Pode ser uma string "100, 101" ou lista
+    numeros = dados.get('numeros')
 
-    if isinstance(numeros, str):
-        numeros = [n.strip() for n in numeros.split(',')]
+    if isinstance(numeros, str): numeros = [n.strip() for n in numeros.split(',')]
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -295,13 +312,12 @@ def admin_aprovar():
 
 @app.route('/api/admin/rejeitar_compra', methods=['POST'])
 def admin_rejeitar():
-    # Transforma 'pendente' em 'disponivel' e remove dono
+    if not check_admin(): return jsonify({'sucesso': False}), 403
     dados = request.json
     usuario_id = dados.get('usuario_id')
     numeros = dados.get('numeros') 
 
-    if isinstance(numeros, str):
-        numeros = [n.strip() for n in numeros.split(',')]
+    if isinstance(numeros, str): numeros = [n.strip() for n in numeros.split(',')]
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -319,6 +335,7 @@ def admin_rejeitar():
 
 @app.route('/api/admin/atualizar_usuario', methods=['POST'])
 def admin_atualizar_usuario():
+    if not check_admin(): return jsonify({'sucesso': False}), 403
     dados = request.json
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -335,6 +352,7 @@ def admin_atualizar_usuario():
 
 @app.route('/api/admin/resetar', methods=['POST'])
 def admin_resetar():
+    if not check_admin(): return jsonify({'sucesso': False}), 403
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -347,8 +365,17 @@ def admin_resetar():
         cursor.close()
         conn.close()
 
+# --- INICIALIZAÇÃO CORRETA PARA REDE (WAITRESS) ---
 if __name__ == '__main__':
+    # Inicializa o banco apenas uma vez (se não for o reloader)
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
         inicializar_banco()
-        webbrowser.open("http://localhost:8000/admin.html")
-    app.run(port=8000, debug=True)
+    
+    print("\n-----------------------------------------------------------")
+    print(" SERVIDOR RODANDO COM WAITRESS (PROFISSIONAL)")
+    print(f" > Para acessar neste PC: http://localhost:8080")
+    print(f" > Para acessar de OUTROS PCs: http://SEU_IP_DO_PC:8080")
+    print("-----------------------------------------------------------\n")
+    
+    # host='0.0.0.0' libera para a rede inteira
+    serve(app, host='0.0.0.0', port=8080)

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50; /* Fundo escuro */
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+        h2 { margin-top: 0; color: #333; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #2980b9; }
+        .error { color: red; font-size: 14px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>Área Restrita</h2>
+        <p>Digite a senha de administrador</p>
+        
+        <input type="password" id="senha" placeholder="Senha" onkeypress="handleEnter(event)">
+        <button onclick="entrar()">Acessar Painel</button>
+        <div id="msgErro" class="error">Senha incorreta!</div>
+    </div>
+
+    <script>
+        function handleEnter(e) {
+            if (e.key === 'Enter') entrar();
+        }
+
+        async function entrar() {
+            const senha = document.getElementById('senha').value;
+            const erro = document.getElementById('msgErro');
+            
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ senha: senha })
+                });
+                const data = await res.json();
+                
+                if (data.sucesso) {
+                    window.location.href = '/admin.html';
+                } else {
+                    erro.style.display = 'block';
+                }
+            } catch (e) {
+                alert("Erro de conexão");
+            }
+        }
+    </script>
+</body>
+</html>
