@@ -1,108 +1,159 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Agradecimento</title>
-<style>
-    body {
-        background-color: #000; 
-        color: #fff;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 50px 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Agradecimento</title>
+    <style>
+        /* 1. Reset para garantir que larguras funcionem corretamente */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    .box {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 40px;
-        border-radius: 15px;
-        width: 100%;
-        max-width: 600px;
-        margin: auto;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    }
+        body {
+            background-color: #000; 
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            /* Flexbox para centralizar verticalmente e horizontalmente */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    h1 { font-size: 36px; margin-bottom: 10px; }
-    p { font-size: 20px; line-height: 1.5; margin-bottom: 20px; }
+        .box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px 20px; /* Padding menor no mobile */
+            border-radius: 15px;
+            width: 100%;
+            max-width: 600px; /* Largura máxima no desktop */
+            margin: auto;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px); /* Efeito moderno de vidro */
+        }
 
-    a.botao {
-        display: block;
-        background-color: #25D366;
-        color: #fff;
-        padding: 15px 20px;
-        border-radius: 8px;
-        font-size: 18px;
-        text-decoration: none;
-        font-weight: bold;
-        margin: 20px auto;
-        max-width: 300px;
-    }
-    
-    a.botao:hover { background-color: #1ebc57; }
+        h1 {
+            font-size: 26px; /* Tamanho base mobile */
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
 
-    .Login{
-        width: 100%;
-        max-width: 300px;
-        height: 50px;
-        background-color: #444;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 18px;
-        color: #fff;
-        font-weight: bold;
-        box-shadow: 0 0 10px rgba(0 , 0, 0, .2);
-        margin-top: 10px;
-    }
-    .Login:hover { background-color: #666; }
-</style>
+        p {
+            font-size: 16px; /* Tamanho base mobile */
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #ddd;
+        }
+
+        /* Estilo comum para Botões (Link e Button) */
+        a.botao, button.Login {
+            display: block;
+            width: 100%; /* Ocupa tudo no mobile */
+            max-width: 100%; /* Remove limite no mobile */
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s, background-color 0.2s;
+            margin: 10px 0; /* Espaçamento vertical */
+        }
+
+        /* Botão WhatsApp */
+        a.botao {
+            background-color: #25D366;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        }
+        a.botao:hover { background-color: #1ebc57; transform: translateY(-2px); }
+
+        /* Botão Voltar */
+        button.Login {
+            background-color: #444;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        button.Login:hover { background-color: #666; transform: translateY(-2px); }
+
+        /* Formulário container para o botão */
+        form {
+            width: 100%;
+        }
+
+        /* --- MEDIA QUERIES (Regras para telas maiores/PC) --- */
+        @media (min-width: 768px) {
+            .box {
+                padding: 50px; /* Mais espaço no PC */
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+
+            p {
+                font-size: 20px;
+            }
+
+            a.botao, button.Login {
+                max-width: 350px; /* Limita largura no PC */
+                margin: 20px auto; /* Centraliza */
+                font-size: 18px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="box">
-    <h1>Obrigada pela compra! 💖</h1>
+    <div class="box">
+        <h1>Obrigado pela compra! 💖</h1>
 
-    <p>
-        Seu número da rifa foi registrado com sucesso!<br><br>
-        📅 <strong>O sorteio será no dia: <span style="color:#25D366;">31/12/2026</span></strong><br><br>
-        🔔 Fique atento(a)! Publicaremos o resultado no WhatsApp.
-    </p>
+        <p>
+            Seu número da rifa foi registrado com sucesso!<br><br>
+            📅 <strong>O sorteio será no dia: <span style="color:#25D366;">31/12/2026</span></strong><br><br>
+            🔔 Fique atento(a)! Publicaremos o resultado no WhatsApp.
+        </p>
 
-    <p><strong>Clique abaixo para enviar o comprovante:</strong></p>
+        <p><strong>Clique abaixo para enviar o comprovante:</strong></p>
 
-    <a id="btn-whatsapp" class="botao" href="#" target="_blank">
-        Enviar Comprovante no WhatsApp
-    </a>
-    
-    <div>
-         <form><button type="submit" class="Login" formaction="home.html">Voltar ao Início</button></form>
+        <a id="btn-whatsapp" class="botao" href="#" target="_blank">
+            <i class="fab fa-whatsapp"></i> Enviar Comprovante no WhatsApp
+        </a>
+        
+        <form action="home.html">
+             <button type="submit" class="Login">Voltar ao Início</button>
+        </form>
     </div>
-</div>
 
-<script>
-    // 1. Recupera todos os dados salvos
-    const numeros = JSON.parse(localStorage.getItem("numerosSelecionados") || "[]");
-    const datas = JSON.parse(localStorage.getItem("datasArraial") || "[]");
-    const total = numeros.length * 50;
+    <script>
+        // 1. Recupera todos os dados salvos
+        const numeros = JSON.parse(localStorage.getItem("numerosSelecionados") || "[]");
+        const datas = JSON.parse(localStorage.getItem("datasArraial") || "[]");
+        const total = numeros.length * 50; // Preço fixo de 50 reais
 
-    // 2. Monta a mensagem bonita
-    let mensagem = `Olá! Segue meu comprovante de pagamento da Rifa.\n\n`;
-    
-    mensagem += `*Números Escolhidos:* ${numeros.join(", ")}\n`;
-    mensagem += `*Valor Total:* R$ ${total},00\n`;
+        // 2. Monta a mensagem bonita
+        let mensagem = `Olá! Segue meu comprovante de pagamento da Rifa.\n\n`;
+        
+        mensagem += `*Números Escolhidos:* ${numeros.join(", ")}\n`;
+        mensagem += `*Valor Total:* R$ ${total},00\n`;
 
-    if (datas.length > 0) {
-        mensagem += `*Fim de Semana em Arraial:* De ${datas[0]} até ${datas[datas.length - 1]}\n`;
-    }
+        if (datas.length > 0) {
+            mensagem += `*Fim de Semana em Arraial:* De ${datas[0]} até ${datas[datas.length - 1]}\n`;
+        }
 
-    mensagem += `\nAguardo a confirmação!`;
+        mensagem += `\nAguardo a confirmação!`;
 
-    const numeroZap = "5521964968099";
-    const linkFinal = `https://wa.me/${numeroZap}?text=${encodeURIComponent(mensagem)}`;
+        const numeroZap = "5521964968099";
+        const linkFinal = `https://wa.me/${numeroZap}?text=${encodeURIComponent(mensagem)}`;
 
-    document.getElementById("btn-whatsapp").href = linkFinal;
-</script>
+        document.getElementById("btn-whatsapp").href = linkFinal;
+    </script>
 
 </body>
 </html>

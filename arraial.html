@@ -31,17 +31,8 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
-    h2 {
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 10px;
-      color: black;
-    }
-
-    p {
-      text-align: center;
-      font-size: 18px;
-    }
+    h2 { text-align: center; font-size: 28px; margin-bottom: 10px; color: black; }
+    p { text-align: center; font-size: 18px; }
 
     .calendar {
       margin: 40px auto;
@@ -54,63 +45,42 @@
     }
 
     .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 20px; font-weight: 800; margin-bottom: 10px;
     }
 
     .days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      text-align: center;
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center;
     }
 
-    .day-name {
-      font-weight: 600;
-      color: #333;
-    }
+    .day-name { font-weight: 600; color: #333; }
 
     .day {
-      padding: 10px;
-      cursor: pointer;
-      border-radius: 10px;
-      transition: 0.2s;
+      padding: 10px; cursor: pointer; border-radius: 10px; transition: 0.2s;
     }
+    .day:hover:not(.blocked) { background: #ccecff; }
 
-    .day:hover {
-      background: #ccecff;
-    }
-
+    /* Dias selecionados pelo usuário atual */
     .selected {
-      background: black;
-      color: white;
-      font-weight: bold;
-      border: 2px solid #333;
+      background: black; color: white; font-weight: bold; border: 2px solid #333;
+    }
+
+    /* Dias ocupados (vindos do banco) */
+    .blocked {
+      background-color: #e0e0e0;
+      color: #999;
+      text-decoration: line-through;
+      cursor: not-allowed;
+      pointer-events: none; /* Impede clique */
     }
     
     .btn {
-      display: block;
-      width: 100%;
-      max-width: 300px;
-      margin: 30px auto;
-      padding: 15px;
-      text-align: center;
-      background: black;
-      color: white;
-      font-size: 18px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: 0.3s;
-      text-decoration: none;
+      display: block; width: 100%; max-width: 300px; margin: 30px auto;
+      padding: 15px; text-align: center; background: black; color: white;
+      font-size: 18px; border-radius: 12px; cursor: pointer; transition: 0.3s;
+      text-decoration: none; border: none;
     }
-
-    .btn:hover {
-      background: #333;
-    }
+    .btn:hover { background: #333; }
   </style>
 </head>
 <body>
@@ -120,7 +90,7 @@
 <div class="container">
   <h2>🎉 Parabéns! 🎉</h2>
   <p>Ao selecionar 4 ou mais números, você ganhou o direito de agendar um <strong>fim de semana em Arraial do Cabo</strong>!</p>
-  <p style="font-size: 14px; color: #555;">(Selecione a Data de Chegada e depois a Data de Saída)</p>
+  <p style="font-size: 14px; color: #555;">(Selecione no máximo 2 dias. Clique novamente para desmarcar)</p>
 
   <div class="calendar">
     <div class="calendar-header">
@@ -133,7 +103,7 @@
     <div class="days" id="days"></div>
   </div>
 
-  <a class="btn" onclick="confirmarData()" href="#">Confirmar Datas</a>
+  <button class="btn" onclick="confirmarData()">Confirmar Datas</button>
   <a class="btn" href="rifas.html" style="background:#555">Voltar</a>
 </div>
 
@@ -151,6 +121,17 @@
   let currentDate = new Date();
   let startDate = null;
   let endDate = null;
+  let occupiedDates = []; 
+
+  window.onload = async function() {
+      try {
+          const response = await fetch('/api/dias_ocupados');
+          occupiedDates = await response.json(); 
+          renderCalendar();
+      } catch (e) {
+          console.error("Erro ao buscar datas:", e);
+      }
+  };
 
   function renderCalendar() {
     const year = currentDate.getFullYear();
@@ -176,44 +157,86 @@
       div.textContent = d;
 
       const thisDate = new Date(year, month, d);
-      thisDate.setHours(0,0,0,0);
+      thisDate.setHours(0,0,0,0); 
+
+      const ano = thisDate.getFullYear();
+      const mes = String(thisDate.getMonth() + 1).padStart(2, '0');
+      const dia = String(thisDate.getDate()).padStart(2, '0');
+      const dataString = `${ano}-${mes}-${dia}`;
+
+      if (occupiedDates.includes(dataString)) {
+          div.classList.add("blocked");
+          div.title = "Indisponível";
+      } else {
+          div.onclick = () => handleDateClick(thisDate);
+      }
 
       if (startDate && thisDate.getTime() === startDate.getTime()) div.classList.add("selected");
       if (endDate && thisDate.getTime() === endDate.getTime()) div.classList.add("selected");
       if (startDate && endDate && thisDate > startDate && thisDate < endDate) div.classList.add("selected");
 
-      div.onclick = () => handleDateClick(thisDate);
       daysContainer.appendChild(div);
     }
   }
 
   function handleDateClick(clickedDate) {
+    // --- LÓGICA DE DESMARCAR ---
+    
+    // Se clicou na data FINAL, remove apenas ela
+    if (endDate && clickedDate.getTime() === endDate.getTime()) {
+        endDate = null;
+        renderCalendar();
+        return;
+    }
+
+    // Se clicou na data INICIAL, limpa tudo (pois não existe fim sem início)
+    if (startDate && clickedDate.getTime() === startDate.getTime()) {
+        startDate = null;
+        endDate = null;
+        renderCalendar();
+        return;
+    }
+    // ---------------------------
+
     if (!startDate || (startDate && endDate)) {
       startDate = clickedDate;
       endDate = null;
     } else if (clickedDate < startDate) {
       startDate = clickedDate;
     } else if (clickedDate > startDate) {
+      
+      // Validação de máximo 2 dias
+      const diffTime = Math.abs(clickedDate - startDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+      if (diffDays > 1) {
+          alert("Atenção: Você só pode selecionar no máximo 2 dias (Ex: Sábado e Domingo).");
+          return; 
+      }
+
+      // Verifica bloqueio no meio
+      let temp = new Date(startDate);
+      let temBloqueioNoMeio = false;
+      while(temp <= clickedDate) {
+          const ano = temp.getFullYear();
+          const mes = String(temp.getMonth() + 1).padStart(2, '0');
+          const dia = String(temp.getDate()).padStart(2, '0');
+          const str = `${ano}-${mes}-${dia}`;
+          if(occupiedDates.includes(str)) {
+              temBloqueioNoMeio = true;
+              break;
+          }
+          temp.setDate(temp.getDate() + 1);
+      }
+
+      if(temBloqueioNoMeio) {
+          alert("Você não pode selecionar um intervalo que contém dias ocupados!");
+          return;
+      }
+
       endDate = clickedDate;
     }
     renderCalendar();
-  }
-
-  function saveToLocalStorage() {
-    if (!startDate || !endDate) return false;
-    
-    let datesList = [];
-    let current = new Date(startDate);
-    while (current <= endDate) {
-      const d = current.getDate();
-      const m = current.getMonth() + 1;
-      const y = current.getFullYear();
-      datesList.push(`${d}/${m}/${y}`);
-      current.setDate(current.getDate() + 1);
-    }
-    
-    localStorage.setItem("datasArraial", JSON.stringify(datesList));
-    return true;
   }
 
   function prevMonth() {
@@ -226,15 +249,43 @@
     renderCalendar();
   }
 
-  function confirmarData() {
-    if (saveToLocalStorage()) {
-       window.location.href = "pagamento.html";
-    } else {
-       alert("Por favor, selecione a data de chegada e a data de saída.");
+  async function confirmarData() {
+    if (!startDate || !endDate) {
+        alert("Por favor, selecione a data de chegada e a data de saída.");
+        return;
+    }
+    
+    let datasParaSalvar = [];
+    let current = new Date(startDate);
+    
+    while (current <= endDate) {
+      const ano = current.getFullYear();
+      const mes = String(current.getMonth() + 1).padStart(2, '0');
+      const dia = String(current.getDate()).padStart(2, '0');
+      datasParaSalvar.push(`${ano}-${mes}-${dia}`);
+      
+      current.setDate(current.getDate() + 1);
+    }
+
+    try {
+        const response = await fetch('/api/agendar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ datas: datasParaSalvar })
+        });
+        const result = await response.json();
+
+        if (result.sucesso) {
+            alert("Datas agendadas com sucesso!");
+            window.location.href = "pagamento.html";
+        } else {
+            alert(result.msg); 
+            window.onload();
+        }
+    } catch (e) {
+        alert("Erro de conexão.");
     }
   }
-
-  renderCalendar();
 </script>
 
 </body>

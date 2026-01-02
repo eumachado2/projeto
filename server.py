@@ -3,7 +3,8 @@ import sys
 import webbrowser
 from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory
 import mysql.connector
-from waitress import serve # <--- IMPORTANTE PARA ACESSO EXTERNO
+from waitress import serve
+from datetime import date, timedelta
 
 # --- CONFIGURAÇÃO ---
 if getattr(sys, 'frozen', False):
@@ -22,7 +23,7 @@ SENHA_ADMIN = 'admsenha4321'
 # --- BANCO DE DADOS ---
 DB_HOST = 'localhost'
 DB_USER = 'root'
-DB_PASS = ''       
+DB_PASS = 'root'           
 DB_NAME = 'sistema_rifa'
 QTD_RIFAS = 5000   
 PRECO_RIFA = 50.00 
@@ -42,6 +43,7 @@ def inicializar_banco():
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
         cursor.execute(f"USE {DB_NAME}")
 
+        # Tabelas
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -60,11 +62,22 @@ def inicializar_banco():
             )
         """)
 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS agendamentos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                usuario_id INT,
+                data DATE NOT NULL,
+                UNIQUE(data), 
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            )
+        """)
+
         try:
             cursor.execute("ALTER TABLE rifas MODIFY COLUMN status ENUM('disponivel', 'pendente', 'vendido') DEFAULT 'disponivel'")
             conn.commit()
         except: pass
 
+        # Expansão de Rifas
         cursor.execute("SELECT COUNT(*) FROM rifas")
         qtd_atual = cursor.fetchone()[0]
 
@@ -74,6 +87,30 @@ def inicializar_banco():
             cursor.executemany("INSERT INTO rifas (numero, status) VALUES (%s, %s)", valores)
             conn.commit()
             print("Novas rifas adicionadas com sucesso!")
+
+        # --- BLOQUEIO DE DATAS PADRÃO (SISTEMA) ---
+        print("Verificando bloqueios de data padrão...")
+        ano_atual = date.today().year
+        intervalos_bloqueio = [
+            (1, 1, 1, 23),   # Janeiro 01 a 23
+            (2, 12, 2, 23)   # Fevereiro 12 a 23
+        ]
+
+        count_bloqueios = 0
+        for m_ini, d_ini, m_fim, d_fim in intervalos_bloqueio:
+            data_atual = date(ano_atual, m_ini, d_ini)
+            data_fim = date(ano_atual, m_fim, d_fim)
+            
+            while data_atual <= data_fim:
+                try:
+                    cursor.execute("INSERT IGNORE INTO agendamentos (data, usuario_id) VALUES (%s, NULL)", (data_atual,))
+                    if cursor.rowcount > 0: count_bloqueios += 1
+                except: pass
+                data_atual += timedelta(days=1)
+        
+        if count_bloqueios > 0:
+            conn.commit()
+            print(f"{count_bloqueios} datas padrão foram bloqueadas.")
         
         cursor.close()
         conn.close()
@@ -219,7 +256,47 @@ def comprar_multiplos():
         return jsonify({'sucesso': True, 'comprados': comprados, 'falharam': falharam})
     return jsonify({'sucesso': False, 'msg': 'Rifas indisponíveis.'})
 
-# --- APIS DO ADMIN (COM PROTEÇÃO) ---
+# --- APIS DO CALENDÁRIO ---
+@app.route('/api/dias_ocupados')
+def dias_ocupados():
+    conn = get_db_connection()
+    if not conn: return jsonify([])
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT DATE_FORMAT(data, '%Y-%m-%d') as data_fmt FROM agendamentos")
+        resultados = cursor.fetchall()
+        lista_datas = [row['data_fmt'] for row in resultados]
+        return jsonify(lista_datas)
+    except Exception as e:
+        return jsonify([])
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/agendar', methods=['POST'])
+def agendar_data():
+    if 'usuario_id' not in session: 
+        return jsonify({'sucesso': False, 'msg': 'Faça login primeiro.'})
+    dados = request.json
+    datas = dados.get('datas', [])
+    usuario_id = session['usuario_id']
+    conn = get_db_connection()
+    if not conn: return jsonify({'sucesso': False, 'msg': 'Erro DB'})
+    try:
+        cursor = conn.cursor()
+        for data_str in datas:
+            cursor.execute("INSERT INTO agendamentos (usuario_id, data) VALUES (%s, %s)", (usuario_id, data_str))
+        conn.commit()
+        return jsonify({'sucesso': True})
+    except mysql.connector.errors.IntegrityError:
+        return jsonify({'sucesso': False, 'msg': 'Ops! Um desses dias acabou de ser reservado por outra pessoa.'})
+    except Exception as e:
+        return jsonify({'sucesso': False, 'msg': str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+
+# --- APIS DO ADMIN ---
 
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login_api():
@@ -234,7 +311,6 @@ def admin_logout():
     session.pop('admin_logado', None)
     return redirect('/admin_login.html')
 
-# Middleware simples para verificar sessão nas rotas abaixo
 def check_admin():
     return session.get('admin_logado')
 
@@ -255,22 +331,25 @@ def admin_dados():
     cursor.execute("SELECT COUNT(*) as pendentes FROM rifas WHERE status='pendente'")
     qtd_pendentes = cursor.fetchone()['pendentes']
 
+    # --- SQL ATUALIZADO COM JOIN E DISTINCT ---
+    # Busca rifas e agendamentos ao mesmo tempo, agrupando por usuário
     query_usuarios = """
         SELECT 
             u.id, 
             u.nome, 
             u.email, 
             u.senha,
-            GROUP_CONCAT(CASE WHEN r.status = 'pendente' THEN r.numero END ORDER BY r.numero SEPARATOR ', ') as numeros_pendentes,
-            GROUP_CONCAT(CASE WHEN r.status = 'vendido' THEN r.numero END ORDER BY r.numero SEPARATOR ', ') as numeros_confirmados
+            GROUP_CONCAT(DISTINCT CASE WHEN r.status = 'pendente' THEN r.numero END ORDER BY r.numero SEPARATOR ', ') as numeros_pendentes,
+            GROUP_CONCAT(DISTINCT CASE WHEN r.status = 'vendido' THEN r.numero END ORDER BY r.numero SEPARATOR ', ') as numeros_confirmados,
+            GROUP_CONCAT(DISTINCT DATE_FORMAT(a.data, '%d/%m/%Y') ORDER BY a.data SEPARATOR ', ') as datas_reservadas
         FROM usuarios u 
         LEFT JOIN rifas r ON u.id = r.dono_id 
+        LEFT JOIN agendamentos a ON u.id = a.usuario_id
         GROUP BY u.id
-        HAVING numeros_pendentes IS NOT NULL OR numeros_confirmados IS NOT NULL
+        ORDER BY u.id DESC
     """
     cursor.execute(query_usuarios)
     usuarios = cursor.fetchall()
-
     cursor.close()
     conn.close()
 
@@ -293,9 +372,7 @@ def admin_aprovar():
     dados = request.json
     usuario_id = dados.get('usuario_id')
     numeros = dados.get('numeros')
-
     if isinstance(numeros, str): numeros = [n.strip() for n in numeros.split(',')]
-
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -316,9 +393,7 @@ def admin_rejeitar():
     dados = request.json
     usuario_id = dados.get('usuario_id')
     numeros = dados.get('numeros') 
-
     if isinstance(numeros, str): numeros = [n.strip() for n in numeros.split(',')]
-
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -350,13 +425,17 @@ def admin_atualizar_usuario():
         cursor.close()
         conn.close()
 
-@app.route('/api/admin/resetar', methods=['POST'])
-def admin_resetar():
+@app.route('/api/admin/excluir_usuario', methods=['POST'])
+def admin_excluir_usuario():
     if not check_admin(): return jsonify({'sucesso': False}), 403
+    dados = request.json
+    usuario_id = dados.get('id')
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("UPDATE rifas SET status='disponivel', dono_id=NULL")
+        cursor.execute("UPDATE rifas SET status='disponivel', dono_id=NULL WHERE dono_id=%s", (usuario_id,))
+        cursor.execute("DELETE FROM agendamentos WHERE usuario_id=%s", (usuario_id,))
+        cursor.execute("DELETE FROM usuarios WHERE id=%s", (usuario_id,))
         conn.commit()
         return jsonify({'sucesso': True})
     except Exception as e:
@@ -365,17 +444,55 @@ def admin_resetar():
         cursor.close()
         conn.close()
 
-# --- INICIALIZAÇÃO CORRETA PARA REDE (WAITRESS) ---
+@app.route('/api/admin/sortear', methods=['POST'])
+def admin_sortear():
+    if not check_admin(): return jsonify({'sucesso': False}), 403
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT r.numero, u.nome, u.email 
+            FROM rifas r 
+            JOIN usuarios u ON r.dono_id = u.id 
+            WHERE r.status = 'vendido' 
+            ORDER BY RAND() 
+            LIMIT 1
+        """)
+        ganhador = cursor.fetchone()
+        
+        if ganhador:
+            return jsonify({'sucesso': True, 'ganhador': ganhador})
+        else:
+            return jsonify({'sucesso': False, 'msg': 'Nenhuma rifa vendida para sortear!'})
+            
+    except Exception as e:
+        return jsonify({'sucesso': False, 'msg': str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/admin/resetar', methods=['POST'])
+def admin_resetar():
+    if not check_admin(): return jsonify({'sucesso': False}), 403
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE rifas SET status='disponivel', dono_id=NULL")
+        cursor.execute("TRUNCATE TABLE agendamentos")
+        conn.commit()
+        return jsonify({'sucesso': True})
+    except Exception as e:
+        return jsonify({'sucesso': False, 'msg': str(e)})
+    finally:
+        cursor.close()
+        conn.close()
+
 if __name__ == '__main__':
-    # Inicializa o banco apenas uma vez (se não for o reloader)
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
         inicializar_banco()
-    
     print("\n-----------------------------------------------------------")
     print(" SERVIDOR RODANDO COM WAITRESS (PROFISSIONAL)")
     print(f" > Para acessar neste PC: http://localhost:8080")
     print(f" > Para acessar de OUTROS PCs: http://SEU_IP_DO_PC:8080")
     print("-----------------------------------------------------------\n")
-    
-    # host='0.0.0.0' libera para a rede inteira
     serve(app, host='0.0.0.0', port=8080)
