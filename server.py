@@ -22,13 +22,13 @@ os.chdir(BASE_DIR)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'seu-email@gmail.com' # TROQUE PELO SEU
-app.config['MAIL_PASSWORD'] = 'sua-senha-de-app'   # TROQUE PELA SENHA DE APP
+app.config['MAIL_USERNAME'] = 'verificarifa@gmail.com' # TROQUE PELO SEU
+app.config['MAIL_PASSWORD'] = 'brpn jbrp eacd hgnl'   # TROQUE PELA SENHA DE APP
 mail = Mail(app)
 
 # --- CONFIGURAÇÕES DO SISTEMA ---
 SENHA_ADMIN = 'admsenha4321'
-DB_HOST, DB_USER, DB_PASS, DB_NAME = 'localhost', 'root', 'root', 'sistema_rifa'
+DB_HOST, DB_USER, DB_PASS, DB_NAME = 'localhost', 'root', '', 'sistema_rifa'
 QTD_RIFAS, PRECO_RIFA = 5000, 50.00
 
 def get_db_connection():
@@ -165,7 +165,7 @@ def api_forgot():
         tk = secrets.token_urlsafe(32); exp = datetime.now() + timedelta(minutes=30)
         cur.execute("UPDATE usuarios SET reset_token=%s, token_expiracao=%s WHERE id=%s", (tk, exp, u['id']))
         c.commit()
-        link = f"http://localhost:8080/redefinir-senha/{tk}"
+        link = f"http://0.0.0.0:8080/redefinir-senha/{tk}"
         msg = Message("Recuperação - Rifa", sender=app.config['MAIL_USERNAME'], recipients=[email])
         msg.body = f"Olá {u['nome']}, clique no link para redefinir sua senha: {link}"
         try: mail.send(msg)
@@ -303,5 +303,5 @@ def api_adm_reset():
 
 if __name__ == '__main__':
     inicializar_banco()
-    print(f"ON: http://localhost:8080")
+    print(f"ON: http://10.40.10.9:8080")
     serve(app, host='0.0.0.0', port=8080)
